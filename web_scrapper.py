@@ -77,3 +77,6 @@ if __name__ == '__main__':
     main()
 
 # TODO: Vou usar o DB Browser for SQLite e vou colocar o ficheiro neste directory!!!!
+# INSERT INTO events VALUES('Tiger', 'Tiger City', '2021.12f.21') -> Permite criar uma nova row na tabela events!!
+# SELECT * FROM events WHERE date='2021.12.21' -> seleciona uma específica date(que pode ter mais que um)
+# DELETE FROM events WHERE date='2021.12.21' -> Elimina a(s) row(s) que têm aquele value in date!!!
