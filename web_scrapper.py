@@ -75,3 +75,5 @@ if __name__ == '__main__':
                       '39.0.2171.95 Safari/537.36'
     }
     main()
+
+# TODO: Vou usar o DB Browser for SQLite e vou colocar o ficheiro neste directory!!!!
