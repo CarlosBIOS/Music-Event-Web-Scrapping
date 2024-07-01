@@ -8,10 +8,11 @@
 # Agregação de dados: Coletar dados de vários websites e consolidá-los num só lugar.
 # Automação de tarefas: Automatizar tarefas repetitivas que envolvem websites.
 import selectorlib
+import sqlite3
 import requests
 from send_email import send_emails
-import time
 from twilio.rest import Client
+import time
 from os import getenv
 
 
@@ -35,15 +36,22 @@ def extract(source: str) -> str:
 
 
 def store(extracted: str) -> None:
-    """Vai guardar os `extracted` num documento de texto"""
-    with open('data.txt', 'a', encoding='utf-8') as file:
-        file.write(extracted + '\n')
+    # """Vai guardar os `extracted` num documento de texto"""
+    # with open('data.txt', 'a', encoding='utf-8') as file:
+    #     file.write(extracted + '\n')
+    band, city, date = extracted.split(', ')
+    cursor = connection.cursor()
+    cursor.execute('INSERT INTO events VALUES(?,?,?)', (band, city, date))
+    connection.commit()
 
 
-def read() -> list:
-    with open('data.txt', encoding='utf-8') as file:
-        data: list = file.readlines()
-    return data
+def read(extracted: str) -> list:
+    # with open('data.txt', encoding='utf-8') as file:
+    #     data: list = file.readlines()
+    band, city, date = extracted.split(', ')
+    cursor = connection.cursor()
+    cursor.execute('SELECT * FROM events WHERE city=? AND band=? AND date=?', (city, band, date))
+    return cursor.fetchall()
 
 
 def main():
@@ -51,8 +59,8 @@ def main():
     while True:
         extracted: str = extract(scrape(URL))
         if extracted != 'No upcoming tours':
-            data: list = read()
-            if extracted not in data:
+            data: list = read(extracted)
+            if not data:
                 store(extracted)
                 message: str = '''\
 Subject: A new content
@@ -63,7 +71,7 @@ Hey, new event was found: {}
                 print('Email was sent!')
                 client = Client(getenv('account_sid_twilio'), getenv('auth_token_twilio'))
                 client.messages.create(from_=getenv('phone_number_twilio'), body=message, to=getenv('my_number'))
-                print('SMS was sent!')
+                print('SMS was sent!\n')
         time.sleep(2)
 
 
@@ -74,6 +82,8 @@ if __name__ == '__main__':
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/'
                       '39.0.2171.95 Safari/537.36'
     }
+    # Faz sentido colocar fora das funções, pois só é preciso executar 1 vez!!!
+    connection = sqlite3.connect('tutorial.db')
     main()
 
 # TODO: Vou usar o DB Browser for SQLite e vou colocar o ficheiro neste directory!!!!
